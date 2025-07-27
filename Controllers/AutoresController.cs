@@ -86,7 +86,7 @@ namespace BibliotecaAPI.Controllers
 
             var autorPatchDTO = mapper.Map<AutorPatchDTO>(autorDB);
 
-            patchDoc.ApplyTo(autorPatchDTO, ModelState);
+            patchDoc.ApplyTo(autorPatchDTO, (Microsoft.AspNetCore.JsonPatch.Adapters.IObjectAdapter)ModelState);
 
             var esValido = TryValidateModel(autorPatchDTO);
 

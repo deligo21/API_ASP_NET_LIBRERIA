@@ -97,7 +97,7 @@ namespace BibliotecaAPI.Controllers
 
             var comentarioPatchDTO = mapper.Map<ComentarioPatchDTO>(comentarioDB);
 
-            patchDoc.ApplyTo(comentarioPatchDTO, ModelState);
+            patchDoc.ApplyTo(comentarioPatchDTO, (Microsoft.AspNetCore.JsonPatch.Adapters.IObjectAdapter)ModelState);
 
             var esValido = TryValidateModel(comentarioPatchDTO);
 
