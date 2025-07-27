@@ -1,11 +1,10 @@
 ﻿using BibliotecaAPI.Validaciones;
 using System.ComponentModel.DataAnnotations;
 
-namespace BibliotecaAPI.Entidades
+namespace BibliotecaAPI.DTOs
 {
-    public class Autor
+    public class AutorPatchDTO
     {
-        public int Id { get; set; }
         [Required(ErrorMessage = "El campo {0} es requerido")]
         [StringLength(150, ErrorMessage = "El campo {0} debe tener {1} caracteres o menos")]
         [PrimeraLetraMayuscula]
@@ -16,6 +15,5 @@ namespace BibliotecaAPI.Entidades
         public required string Apellidos { get; set; }
         [StringLength(20, ErrorMessage = "El campo {0} debe tener {1} caracteres o menos")]
         public string? Identificacion { get; set; }
-        public List<AutorLibro> Libros { get; set; } = [];
     }
 }
