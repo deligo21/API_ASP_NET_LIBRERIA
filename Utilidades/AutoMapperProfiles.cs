@@ -40,7 +40,8 @@ namespace BibliotecaAPI.Utilidades
                     config => config.MapFrom(dto => new Libro { Titulo = dto.Titulo }));
 
             CreateMap<ComentarioCreacionDTO, Comentario>();
-            CreateMap<Comentario, ComentarioDTO>();
+            CreateMap<Comentario, ComentarioDTO>().
+                ForMember(dto => dto.UsuarioEmail, config => config.MapFrom(ent => ent.Usuario!.Email));
             CreateMap<ComentarioPatchDTO, Comentario>().ReverseMap();
         }
 

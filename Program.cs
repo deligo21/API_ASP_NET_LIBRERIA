@@ -1,5 +1,6 @@
 using BibliotecaAPI;
 using BibliotecaAPI.Datos;
+using BibliotecaAPI.Servicios;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
@@ -15,8 +16,11 @@ builder.Services.AddDbContext<ApplicationDbContext>(opciones => opciones.UseSqlS
 builder.Services.AddIdentityCore<IdentityUser>().
     AddEntityFrameworkStores<ApplicationDbContext>()
     .AddDefaultTokenProviders();
+
 builder.Services.AddScoped<UserManager<IdentityUser>>();
 builder.Services.AddScoped<SignInManager<IdentityUser>>();
+builder.Services.AddTransient<IServicioUsuarios, ServicioUsuarios>();
+
 builder.Services.AddHttpContextAccessor();
 
 builder.Services.AddAuthentication().AddJwtBearer(opciones =>
