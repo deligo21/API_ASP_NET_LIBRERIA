@@ -1,8 +1,12 @@
-﻿using BibliotecaAPI.DTOs;
+﻿using AutoMapper;
+using BibliotecaAPI.Datos;
+using BibliotecaAPI.DTOs;
+using BibliotecaAPI.Entidades;
 using BibliotecaAPI.Servicios;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
@@ -11,27 +15,41 @@ namespace BibliotecaAPI.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    [Authorize]
     public class UsuariosController: ControllerBase
     {
-        private readonly UserManager<IdentityUser> userManager;
-        private readonly SignInManager<IdentityUser> signInManager;
+        private readonly UserManager<Usuario> userManager;
+        private readonly SignInManager<Usuario> signInManager;
         private readonly IConfiguration configuration;
         private readonly IServicioUsuarios servicioUsuarios;
+        private readonly ApplicationDbContext context;
+        private readonly IMapper mapper;
 
-        public UsuariosController(UserManager<IdentityUser> userManager, SignInManager<IdentityUser> signInManager, IConfiguration configuration, IServicioUsuarios servicioUsuarios)
+        public UsuariosController(
+            UserManager<Usuario> userManager, SignInManager<Usuario> signInManager, IConfiguration configuration, 
+            IServicioUsuarios servicioUsuarios, ApplicationDbContext context, IMapper mapper)
         {
             this.userManager = userManager;
             this.signInManager = signInManager;
             this.configuration = configuration;
             this.servicioUsuarios = servicioUsuarios;
+            this.context = context;
+            this.mapper = mapper;
+        }
+
+        [HttpGet]
+        [Authorize(Policy = "esAdmin")]
+        public async Task<IEnumerable<UsuarioDTO>> Get()
+        {
+            var usuarios = await context.Users.ToListAsync();
+            var usuariosDTO = mapper.Map<IEnumerable<UsuarioDTO>>(usuarios);
+
+            return usuariosDTO;
         }
 
         [HttpPost("registro")]
-        [AllowAnonymous]
         public async Task<ActionResult<RespuestaAutenticacionDTO>> Registrar(CredencialesUsuarioDTO credencialesUsuarioDTO)
         {
-            var usuario = new IdentityUser
+            var usuario = new Usuario
             {
                 UserName = credencialesUsuarioDTO.Email,
                 Email = credencialesUsuarioDTO.Email
@@ -55,7 +73,6 @@ namespace BibliotecaAPI.Controllers
         }
 
         [HttpPost("login")]
-        [AllowAnonymous]
         public async Task<ActionResult<RespuestaAutenticacionDTO>> Login(CredencialesUsuarioDTO credencialesUsuarioDTO)
         {
             var usuario = await userManager.FindByEmailAsync(credencialesUsuarioDTO.Email);
@@ -74,7 +91,36 @@ namespace BibliotecaAPI.Controllers
             }
         }
 
+        [HttpPut]
+        [Authorize]
+        public async Task<ActionResult<RespuestaAutenticacionDTO>> Put(ActualizarUsuarioDTO actualizarUsuarioDTO)
+        {
+            var usuario = await servicioUsuarios.ObtenerUsuario();
+
+            if (usuario is null)
+            {
+                return NotFound();
+            }
+
+            usuario.FechaNacimiento = actualizarUsuarioDTO.FechaNacimiento;
+            
+            var resultado = await userManager.UpdateAsync(usuario);
+            if (resultado.Succeeded)
+            {
+                return NoContent();
+            }
+            else
+            {
+                foreach (var error in resultado.Errors)
+                {
+                    ModelState.AddModelError(string.Empty, error.Description);
+                }
+                return ValidationProblem();
+            }
+        }
+
         [HttpGet("renovar-token")]
+        [Authorize]
         public async Task<ActionResult<RespuestaAutenticacionDTO>> RenovarToken()
         {
             var usuario = await servicioUsuarios.ObtenerUsuario();
@@ -90,6 +136,54 @@ namespace BibliotecaAPI.Controllers
 
             var respuestaAutenticacion = await ConstruirToken(credencialesUsuarioDTO);
             return respuestaAutenticacion;
+        }
+
+        [HttpPost("hacer-admin")]
+        //[Authorize(Policy = "esAdmin")]
+        public  async Task<ActionResult> HacerAdmin(EditarClaimDTO editarClaimDTO)
+        {
+            var usuario = await userManager.FindByEmailAsync(editarClaimDTO.Email);
+            if (usuario is null)
+            {
+                return NotFound();
+            }
+            var resultado = await userManager.AddClaimAsync(usuario, new Claim("esAdmin", "true"));
+            if (resultado.Succeeded)
+            {
+                return NoContent();
+            }
+            else
+            {
+                foreach (var error in resultado.Errors)
+                {
+                    ModelState.AddModelError(string.Empty, error.Description);
+                }
+                return ValidationProblem();
+            }
+        }
+
+        [HttpPost("remover-admin")]
+        [Authorize(Policy = "esAdmin")]
+        public async Task<ActionResult> RemoverAdmin(EditarClaimDTO editarClaimDTO)
+        {
+            var usuario = await userManager.FindByEmailAsync(editarClaimDTO.Email);
+            if (usuario is null)
+            {
+                return NotFound();
+            }
+            var resultado = await userManager.RemoveClaimAsync(usuario, new Claim("esAdmin", "true"));
+            if (resultado.Succeeded)
+            {
+                return NoContent();
+            }
+            else
+            {
+                foreach (var error in resultado.Errors)
+                {
+                    ModelState.AddModelError(string.Empty, error.Description);
+                }
+                return ValidationProblem();
+            }
         }
 
         private ActionResult RetornanLoginIncorrecto()
