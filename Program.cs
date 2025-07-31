@@ -11,6 +11,14 @@ using System.Text.Json.Serialization;
 var builder = WebApplication.CreateBuilder(args);
 
 //Area de Servicios
+var origenesPermitidos = builder.Configuration.GetSection("origenesPermitidos").Get<string[]>()!;
+builder.Services.AddCors(opciones =>
+{
+    opciones.AddDefaultPolicy(opcionesCORS =>
+    {
+        opcionesCORS.WithOrigins(origenesPermitidos).AllowAnyMethod().AllowAnyHeader();
+    });
+});
 builder.Services.AddAutoMapper(cfg => { }, typeof(Program));
 builder.Services.AddControllers().AddNewtonsoftJson();
 builder.Services.AddDbContext<ApplicationDbContext>(opciones => opciones.UseSqlServer("name=DefaultConnection"));
@@ -47,7 +55,7 @@ builder.Services.AddAuthorization(opciones =>
 });
 
 var app = builder.Build();
-
+app.UseCors();
 // Area de middlewares
 app.MapControllers();
 
