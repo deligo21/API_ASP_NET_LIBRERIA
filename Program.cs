@@ -11,6 +11,7 @@ using System.Text.Json.Serialization;
 var builder = WebApplication.CreateBuilder(args);
 
 //Area de Servicios
+builder.Services.AddDataProtection();
 var origenesPermitidos = builder.Configuration.GetSection("origenesPermitidos").Get<string[]>()!;
 builder.Services.AddCors(opciones =>
 {
