@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.ComponentModel;
 
 namespace BibliotecaAPI.Controllers
 {
@@ -35,7 +36,11 @@ namespace BibliotecaAPI.Controllers
 
         [HttpGet("{id:int}", Name = "ObtenerAutor")] // api/autores/id
         [AllowAnonymous]
-        public async Task<ActionResult<AutorConLibrosDTO>> Get(int id)
+        [EndpointSummary("Obtener un autor por su ID")]
+        [EndpointDescription("Devuelve un autor junto con sus libros asociados, si los hay.")]
+        [ProducesResponseType(typeof(AutorConLibrosDTO), 200)]
+        [ProducesResponseType(404)]
+        public async Task<ActionResult<AutorConLibrosDTO>> Get([Description("El ID del autor")]int id)
         {
             var autor = await context.Autores
                 .Include(x => x.Libros)
