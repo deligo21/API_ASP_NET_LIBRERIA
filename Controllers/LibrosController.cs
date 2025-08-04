@@ -54,6 +54,7 @@ namespace BibliotecaAPI.Controllers
         }
 
         [HttpGet]
+        [AllowAnonymous]
         public async Task<IEnumerable<LibroDTO>> Get()
         {
             var libros = await context.Libros.ToListAsync();
@@ -62,6 +63,7 @@ namespace BibliotecaAPI.Controllers
         }
 
         [HttpGet("{id:int}", Name = "ObtenerLibro")]
+        [AllowAnonymous]
         public async Task<ActionResult<LibroConAutoresDTO>> Get(int id)
         {
             var libro = await context.Libros

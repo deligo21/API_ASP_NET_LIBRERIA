@@ -56,9 +56,16 @@ builder.Services.AddAuthorization(opciones =>
     });
 });
 
+builder.Services.AddSwaggerGen();
+
 var app = builder.Build();
-app.UseCors();
+
 // Area de middlewares
+app.UseSwagger();
+app.UseSwaggerUI();
+
+app.UseCors();
+
 app.MapControllers();
 
 app.Run();

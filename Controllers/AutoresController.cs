@@ -34,6 +34,7 @@ namespace BibliotecaAPI.Controllers
 
 
         [HttpGet("{id:int}", Name = "ObtenerAutor")] // api/autores/id
+        [AllowAnonymous]
         public async Task<ActionResult<AutorConLibrosDTO>> Get(int id)
         {
             var autor = await context.Autores
