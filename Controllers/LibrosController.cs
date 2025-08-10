@@ -93,28 +93,9 @@ namespace BibliotecaAPI.Controllers
         }
 
         [HttpPost]
+        [ServiceFilter<FiltroValidacionLibro>()]
         public async Task<ActionResult> Post(LibroCreacionDTO libroCreacionDTO)
         {
-            if (libroCreacionDTO.AutoresIds is null || libroCreacionDTO.AutoresIds.Count == 0)
-            {
-                ModelState.AddModelError(nameof(libroCreacionDTO.AutoresIds),
-                    "No se puede crear un libro sin autores");
-                return ValidationProblem();
-            }
-
-            var autoresIdsExisten = await context.Autores
-                                    .Where(x => libroCreacionDTO.AutoresIds.Contains(x.Id))
-                                    .Select(x => x.Id).ToListAsync();
-
-            if (autoresIdsExisten.Count != libroCreacionDTO.AutoresIds.Count)
-            {
-                var autoresNoExisten = libroCreacionDTO.AutoresIds.Except(autoresIdsExisten);
-                var autoresNoExistenString = string.Join(",", autoresNoExisten);
-                var mensajeDeError = $"Los siguientes autores no existen: {autoresNoExistenString}";
-                ModelState.AddModelError(nameof(libroCreacionDTO.AutoresIds), mensajeDeError);
-                return ValidationProblem();
-            }
-
             var libro = mapper.Map<Libro>(libroCreacionDTO);
             AsignarOrdenAutores(libro);
 
@@ -139,28 +120,9 @@ namespace BibliotecaAPI.Controllers
         }
 
         [HttpPut("{id:int}")]
+        [ServiceFilter<FiltroValidacionLibro>()]
         public async Task<ActionResult> Put(int id, LibroCreacionDTO libroCreacionDTO)
         {
-            if (libroCreacionDTO.AutoresIds is null || libroCreacionDTO.AutoresIds.Count == 0)
-            {
-                ModelState.AddModelError(nameof(libroCreacionDTO.AutoresIds),
-                    "No se puede crear un libro sin autores");
-                return ValidationProblem();
-            }
-
-            var autoresIdsExisten = await context.Autores
-                                    .Where(x => libroCreacionDTO.AutoresIds.Contains(x.Id))
-                                    .Select(x => x.Id).ToListAsync();
-
-            if (autoresIdsExisten.Count != libroCreacionDTO.AutoresIds.Count)
-            {
-                var autoresNoExisten = libroCreacionDTO.AutoresIds.Except(autoresIdsExisten);
-                var autoresNoExistenString = string.Join(",", autoresNoExisten);
-                var mensajeDeError = $"Los siguientes autores no existen: {autoresNoExistenString}";
-                ModelState.AddModelError(nameof(libroCreacionDTO.AutoresIds), mensajeDeError);
-                return ValidationProblem();
-            }
-
             var libroDB = await context.Libros
                             .Include(x => x.Autores)
                             .FirstOrDefaultAsync(x => x.Id == id);
