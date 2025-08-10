@@ -17,6 +17,7 @@ namespace BibliotecaAPI.Controllers
     [ApiController]
     [Route("api/autores")]
     [Authorize(Policy = "esAdmin")]
+    [FiltroAgregarCabeceras("X-Powered-By", "BibliotecaAPI")]
     public class AutoresController : ControllerBase
     {
         private readonly ApplicationDbContext context;
@@ -42,6 +43,7 @@ namespace BibliotecaAPI.Controllers
         [AllowAnonymous]
         [OutputCache(Tags = [cache])]
         [ServiceFilter<MiFiltroDeAccion>()]
+        [FiltroAgregarCabeceras("accion", "obtener-autores")]
         public async Task<IEnumerable<AutorDTO>> Get([FromQuery] PaginacionDTO paginacionDTO)
         {
             var queryable = context.Autores.AsQueryable();
