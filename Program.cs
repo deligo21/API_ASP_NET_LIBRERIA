@@ -4,6 +4,7 @@ using BibliotecaAPI.Entidades;
 using BibliotecaAPI.Servicios;
 using BibliotecaAPI.Swagger;
 using BibliotecaAPI.Utilidades;
+using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
@@ -110,6 +111,29 @@ builder.Services.AddSwaggerGen(opciones =>
 var app = builder.Build();
 
 // Area de middlewares
+app.UseExceptionHandler(exceptionHandlerApp => exceptionHandlerApp.Run(async context =>
+{
+    var exceptionHandlerFeature = context.Features.Get<IExceptionHandlerFeature>();
+    var exception = exceptionHandlerFeature?.Error!;
+
+    var error = new Error()
+    {
+        MensajeError = exception.Message,
+        StackTrace = exception.StackTrace,
+        Fecha = DateTime.UtcNow
+    };
+
+    var dbContext = context.RequestServices.GetRequiredService<ApplicationDbContext>();
+    dbContext.Add(error);
+    await dbContext.SaveChangesAsync();
+    await Results.InternalServerError(new
+    {
+        tipo = "Error interno del servidor",
+        mensaje = "Ocurrió un error inesperado. Por favor, inténtelo de nuevo más tarde.",
+        estatus = 500
+    }).ExecuteAsync(context);
+}));
+
 app.UseSwagger();
 app.UseSwaggerUI();
 
