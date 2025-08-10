@@ -41,7 +41,7 @@ namespace BibliotecaAPI.Controllers
 
         [HttpGet] // api/autores
         [AllowAnonymous]
-        [OutputCache(Tags = [cache])]
+        //[OutputCache(Tags = [cache])]
         [ServiceFilter<MiFiltroDeAccion>()]
         [FiltroAgregarCabeceras("accion", "obtener-autores")]
         public async Task<IEnumerable<AutorDTO>> Get([FromQuery] PaginacionDTO paginacionDTO)
@@ -60,7 +60,7 @@ namespace BibliotecaAPI.Controllers
         [EndpointDescription("Devuelve un autor junto con sus libros asociados, si los hay.")]
         [ProducesResponseType(typeof(AutorConLibrosDTO), 200)]
         [ProducesResponseType(404)]
-        [OutputCache(Tags = [cache])]
+        //[OutputCache(Tags = [cache])]
         public async Task<ActionResult<AutorConLibrosDTO>> Get([Description("El ID del autor")]int id)
         {
             var autor = await context.Autores
