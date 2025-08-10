@@ -41,6 +41,7 @@ namespace BibliotecaAPI.Controllers
         [HttpGet] // api/autores
         [AllowAnonymous]
         [OutputCache(Tags = [cache])]
+        [ServiceFilter<MiFiltroDeAccion>()]
         public async Task<IEnumerable<AutorDTO>> Get([FromQuery] PaginacionDTO paginacionDTO)
         {
             var queryable = context.Autores.AsQueryable();
