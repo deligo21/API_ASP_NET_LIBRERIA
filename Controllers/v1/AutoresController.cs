@@ -12,10 +12,10 @@ using Microsoft.EntityFrameworkCore;
 using System.ComponentModel;
 using System.Linq.Dynamic.Core;
 
-namespace BibliotecaAPI.Controllers
+namespace BibliotecaAPI.Controllers.v1
 {
     [ApiController]
-    [Route("api/autores")]
+    [Route("api/v1/autores")]
     [Authorize(Policy = "esAdmin")]
     [FiltroAgregarCabeceras("X-Powered-By", "BibliotecaAPI")]
     public class AutoresController : ControllerBase
@@ -54,7 +54,7 @@ namespace BibliotecaAPI.Controllers
         }
 
 
-        [HttpGet("{id:int}", Name = "ObtenerAutor")] // api/autores/id
+        [HttpGet("{id:int}", Name = "ObtenerAutorv1")] // api/autores/id
         [AllowAnonymous]
         [EndpointSummary("Obtener un autor por su ID")]
         [EndpointDescription("Devuelve un autor junto con sus libros asociados, si los hay.")]
@@ -169,7 +169,7 @@ namespace BibliotecaAPI.Controllers
             await context.SaveChangesAsync();
             await outputCacheStore.EvictByTagAsync(cache, default);
             var autorDTO = mapper.Map<AutorDTO>(autor);
-            return CreatedAtRoute("ObtenerAutor", new { id = autor.Id }, autorDTO);
+            return CreatedAtRoute("ObtenerAutorv1", new { id = autor.Id }, autorDTO);
         }
         
         [HttpPost("con-foto")]
@@ -186,7 +186,7 @@ namespace BibliotecaAPI.Controllers
             await context.SaveChangesAsync();
             await outputCacheStore.EvictByTagAsync(cache, default);
             var autorDTO = mapper.Map<AutorDTO>(autor);
-            return CreatedAtRoute("ObtenerAutor", new { id = autor.Id }, autorDTO);
+            return CreatedAtRoute("ObtenerAutorv1", new { id = autor.Id }, autorDTO);
         }
 
         [HttpPut("{id:int}")] // api/autores/id

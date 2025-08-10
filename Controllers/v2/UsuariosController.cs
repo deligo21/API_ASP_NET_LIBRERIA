@@ -11,10 +11,10 @@ using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 
-namespace BibliotecaAPI.Controllers
+namespace BibliotecaAPI.Controllers.v2
 {
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("api/v2/[controller]")]
     public class UsuariosController: ControllerBase
     {
         private readonly UserManager<Usuario> userManager;
