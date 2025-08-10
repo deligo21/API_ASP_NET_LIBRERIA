@@ -13,6 +13,11 @@ using System.Text.Json.Serialization;
 var builder = WebApplication.CreateBuilder(args);
 
 //Area de Servicios
+builder.Services.AddOutputCache(opciones =>
+{
+    opciones.DefaultExpirationTimeSpan = TimeSpan.FromSeconds(15);
+});
+
 builder.Services.AddDataProtection();
 var origenesPermitidos = builder.Configuration.GetSection("origenesPermitidos").Get<string[]>()!;
 builder.Services.AddCors(opciones =>
@@ -101,6 +106,8 @@ app.UseSwaggerUI();
 app.UseStaticFiles();
 
 app.UseCors();
+
+app.UseOutputCache();
 
 app.MapControllers();
 

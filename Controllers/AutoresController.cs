@@ -7,6 +7,7 @@ using BibliotecaAPI.Utilidades;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.OutputCaching;
 using Microsoft.EntityFrameworkCore;
 using System.ComponentModel;
 using System.Linq.Dynamic.Core;
@@ -22,18 +23,24 @@ namespace BibliotecaAPI.Controllers
         private readonly IMapper mapper;
         private readonly IAlmacenadorArchivos almacenadorArchivos;
         private readonly ILogger<AutoresController> logger;
+        private readonly IOutputCacheStore outputCacheStore;
         private const string contenedor = "Autores";
+        private const string cache = "autores-obtener";
 
-        public AutoresController(ApplicationDbContext context, IMapper mapper, IAlmacenadorArchivos almacenadorArchivos, ILogger<AutoresController> logger)
+        public AutoresController(
+            ApplicationDbContext context, IMapper mapper, IAlmacenadorArchivos almacenadorArchivos, 
+            ILogger<AutoresController> logger, IOutputCacheStore outputCacheStore)
         {
             this.context = context;
             this.mapper = mapper;
             this.almacenadorArchivos = almacenadorArchivos;
             this.logger = logger;
+            this.outputCacheStore = outputCacheStore;
         }
 
         [HttpGet] // api/autores
         [AllowAnonymous]
+        [OutputCache(Tags = [cache])]
         public async Task<IEnumerable<AutorDTO>> Get([FromQuery] PaginacionDTO paginacionDTO)
         {
             var queryable = context.Autores.AsQueryable();
@@ -50,6 +57,7 @@ namespace BibliotecaAPI.Controllers
         [EndpointDescription("Devuelve un autor junto con sus libros asociados, si los hay.")]
         [ProducesResponseType(typeof(AutorConLibrosDTO), 200)]
         [ProducesResponseType(404)]
+        [OutputCache(Tags = [cache])]
         public async Task<ActionResult<AutorConLibrosDTO>> Get([Description("El ID del autor")]int id)
         {
             var autor = await context.Autores
@@ -156,6 +164,7 @@ namespace BibliotecaAPI.Controllers
             var autor = mapper.Map<Autor>(autorCreacionDTO);
             context.Add(autor);
             await context.SaveChangesAsync();
+            await outputCacheStore.EvictByTagAsync(cache, default);
             var autorDTO = mapper.Map<AutorDTO>(autor);
             return CreatedAtRoute("ObtenerAutor", new { id = autor.Id }, autorDTO);
         }
@@ -172,6 +181,7 @@ namespace BibliotecaAPI.Controllers
 
             context.Add(autor);
             await context.SaveChangesAsync();
+            await outputCacheStore.EvictByTagAsync(cache, default);
             var autorDTO = mapper.Map<AutorDTO>(autor);
             return CreatedAtRoute("ObtenerAutor", new { id = autor.Id }, autorDTO);
         }
@@ -200,6 +210,7 @@ namespace BibliotecaAPI.Controllers
 
             context.Update(autor);
             await context.SaveChangesAsync();
+            await outputCacheStore.EvictByTagAsync(cache, default);
             return NoContent();
         }
 
@@ -232,6 +243,7 @@ namespace BibliotecaAPI.Controllers
             mapper.Map(autorPatchDTO, autorDB);
 
             await context.SaveChangesAsync();
+            await outputCacheStore.EvictByTagAsync(cache, default);
 
             return NoContent();
         }
@@ -247,6 +259,7 @@ namespace BibliotecaAPI.Controllers
 
             context.Remove(autor);
             await context.SaveChangesAsync();
+            await outputCacheStore.EvictByTagAsync(cache, default);
             await almacenadorArchivos.Borrar(autor.Foto, contenedor);
 
             return NoContent();
