@@ -38,7 +38,9 @@ builder.Services.AddAutoMapper(cfg => { }, typeof(Program));
 builder.Services.AddControllers(opciones =>
 {
     opciones.Filters.Add<FiltroTiempoEjecucion>();
+    opciones.Conventions.Add(new ConvencionAgrupaPorVersion());
 }).AddNewtonsoftJson();
+
 builder.Services.AddDbContext<ApplicationDbContext>(opciones => opciones.UseSqlServer("name=DefaultConnection"));
 builder.Services.AddIdentityCore<Usuario>().
     AddEntityFrameworkStores<ApplicationDbContext>()
@@ -97,6 +99,24 @@ builder.Services.AddSwaggerGen(opciones =>
         }
     });
 
+    opciones.SwaggerDoc("v2", new OpenApiInfo
+    {
+        Title = "Biblioteca API",
+        Version = "v2",
+        Description = "Este es un web api para trabajar con datos de autores y libros",
+        Contact = new OpenApiContact
+        {
+            Name = "Rodrigo Rojas",
+            Email = "arrp1239@gmail.com",
+            Url = new Uri("https://github.com/deligo21")
+        },
+        License = new OpenApiLicense
+        {
+            Name = "MIT",
+            Url = new Uri("https://opensource.org/license/mit/")
+        }
+    });
+
     opciones.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {
         Name = "Authorization",
@@ -136,7 +156,11 @@ app.UseExceptionHandler(exceptionHandlerApp => exceptionHandlerApp.Run(async con
 }));
 
 app.UseSwagger();
-app.UseSwaggerUI();
+app.UseSwaggerUI(opciones =>
+{
+    opciones.SwaggerEndpoint("/swagger/v1/swagger.json", "Biblioteca API V1");
+    opciones.SwaggerEndpoint("/swagger/v2/swagger.json", "Biblioteca API V2");
+});
 
 app.UseStaticFiles();
 
