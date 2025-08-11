@@ -51,6 +51,7 @@ builder.Services.AddTransient<IServicioHash, ServicioHash>();
 builder.Services.AddTransient<IAlmacenadorArchivos, AlmacenadorArchivosLocal>();
 builder.Services.AddScoped<MiFiltroDeAccion>();
 builder.Services.AddScoped<FiltroValidacionLibro>();
+builder.Services.AddScoped<BibliotecaAPI.Servicios.v1.IServicioAutores, BibliotecaAPI.Servicios.v1.ServicioAutores>();
 
 builder.Services.AddHttpContextAccessor();
 

@@ -3,6 +3,7 @@ using BibliotecaAPI.Datos;
 using BibliotecaAPI.DTOs;
 using BibliotecaAPI.Entidades;
 using BibliotecaAPI.Servicios;
+using BibliotecaAPI.Servicios.v1;
 using BibliotecaAPI.Utilidades;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.JsonPatch;
@@ -25,18 +26,20 @@ namespace BibliotecaAPI.Controllers.v2
         private readonly IAlmacenadorArchivos almacenadorArchivos;
         private readonly ILogger<AutoresController> logger;
         private readonly IOutputCacheStore outputCacheStore;
+        private readonly IServicioAutores servicioAutoresV1;
         private const string contenedor = "Autores";
         private const string cache = "autores-obtener";
 
         public AutoresController(
             ApplicationDbContext context, IMapper mapper, IAlmacenadorArchivos almacenadorArchivos, 
-            ILogger<AutoresController> logger, IOutputCacheStore outputCacheStore)
+            ILogger<AutoresController> logger, IOutputCacheStore outputCacheStore, IServicioAutores servicioAutoresV1)
         {
             this.context = context;
             this.mapper = mapper;
             this.almacenadorArchivos = almacenadorArchivos;
             this.logger = logger;
             this.outputCacheStore = outputCacheStore;
+            this.servicioAutoresV1 = servicioAutoresV1;
         }
 
         [HttpGet] // api/autores
@@ -46,11 +49,7 @@ namespace BibliotecaAPI.Controllers.v2
         [FiltroAgregarCabeceras("accion", "obtener-autores")]
         public async Task<IEnumerable<AutorDTO>> Get([FromQuery] PaginacionDTO paginacionDTO)
         {
-            var queryable = context.Autores.AsQueryable();
-            await HttpContext.InsertarParametrosPaginacionEnCabecera(queryable);
-            var autores = await queryable.OrderBy(x => x.Nombres).Paginar(paginacionDTO).ToListAsync();
-            var autoresDTO = mapper.Map<IEnumerable<AutorDTO>>(autores);
-            return autoresDTO;
+            return await servicioAutoresV1.Get(paginacionDTO);
         }
 
 
