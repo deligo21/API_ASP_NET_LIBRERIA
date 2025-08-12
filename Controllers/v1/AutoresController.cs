@@ -42,7 +42,7 @@ namespace BibliotecaAPI.Controllers.v1
             this.servicioAutoresV1 = servicioAutoresV1;
         }
 
-        [HttpGet] // api/autores
+        [HttpGet(Name = "ObtenerAutoresV1")] // api/autores
         [AllowAnonymous]
         //[OutputCache(Tags = [cache])]
         [ServiceFilter<MiFiltroDeAccion>()]
@@ -74,10 +74,35 @@ namespace BibliotecaAPI.Controllers.v1
 
             var autorDTO = mapper.Map<AutorConLibrosDTO>(autor);
 
+            GenerarEnlaces(autorDTO);
+
             return autorDTO;
         }
 
-        [HttpGet("filtrar")]
+        private void GenerarEnlaces(AutorDTO autorDTO)
+        {
+            autorDTO.Enlaces.Add(new DatosHATEOASDTO(
+                Enlace: Url.Link("ObtenerAutorV1", new {id = autorDTO.Id})!,
+                Descripcion: "self",
+                Metodo: "GET"));
+
+            autorDTO.Enlaces.Add(new DatosHATEOASDTO(
+                Enlace: Url.Link("ActualizarAutorV1", new {id = autorDTO.Id})!,
+                Descripcion: "autor-actualizar",
+                Metodo: "PUT"));
+
+            autorDTO.Enlaces.Add(new DatosHATEOASDTO(
+                Enlace: Url.Link("PatchAutorV1", new {id = autorDTO.Id})!,
+                Descripcion: "autor-patch",
+                Metodo: "PATCH"));
+
+            autorDTO.Enlaces.Add(new DatosHATEOASDTO(
+                Enlace: Url.Link("BorrarAutorV1", new {id = autorDTO.Id})!,
+                Descripcion: "autor-borrar",
+                Metodo: "DELETE"));
+        }
+
+        [HttpGet("filtrar", Name = "FiltrarAutoresV1")]
         [AllowAnonymous]
         public async Task<ActionResult> Filtrar([FromQuery] AutorFiltroDTO autorFiltroDTO)
         {
@@ -160,7 +185,7 @@ namespace BibliotecaAPI.Controllers.v1
             }
         }
 
-        [HttpPost]
+        [HttpPost(Name = "CrearAutorV1")]
         public async Task<ActionResult> Post(AutorCreacionDTO autorCreacionDTO)
         {
             var autor = mapper.Map<Autor>(autorCreacionDTO);
@@ -171,7 +196,7 @@ namespace BibliotecaAPI.Controllers.v1
             return CreatedAtRoute("ObtenerAutorv1", new { id = autor.Id }, autorDTO);
         }
         
-        [HttpPost("con-foto")]
+        [HttpPost("con-foto", Name = "CrearAutorConFotoV1")]
         public async Task<ActionResult> PostConFoto([FromForm] AutorCreacionDTOConFoto autorCreacionDTO)
         {
             var autor = mapper.Map<Autor>(autorCreacionDTO);
@@ -188,7 +213,7 @@ namespace BibliotecaAPI.Controllers.v1
             return CreatedAtRoute("ObtenerAutorv1", new { id = autor.Id }, autorDTO);
         }
 
-        [HttpPut("{id:int}")] // api/autores/id
+        [HttpPut("{id:int}", Name = "ActualizarAutorV1")] // api/autores/id
         public async Task<ActionResult> Put(int id, [FromForm] AutorCreacionDTOConFoto autorCreacionDTO)
         {
             var existeAutor = await context.Autores.AnyAsync(x => x.Id == id);
@@ -216,7 +241,7 @@ namespace BibliotecaAPI.Controllers.v1
             return NoContent();
         }
 
-        [HttpPatch("{id:int}")]
+        [HttpPatch("{id:int}", Name = "PatchAutorV1")]
         public async Task<ActionResult> Patch(int id, JsonPatchDocument<AutorPatchDTO> patchDoc)
         {
             if (patchDoc is null)
@@ -250,7 +275,7 @@ namespace BibliotecaAPI.Controllers.v1
             return NoContent();
         }
 
-        [HttpDelete("{id:int}")]
+        [HttpDelete("{id:int}", Name = "BorrarAutorV1")]
         public async Task<ActionResult> Delete(int id)
         {
             var autor = await context.Autores.FirstOrDefaultAsync(x => x.Id == id);

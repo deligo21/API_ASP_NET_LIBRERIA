@@ -60,7 +60,7 @@ namespace BibliotecaAPI.Controllers.v1
             return Ok(librosDTO);
         }
 
-        [HttpGet]
+        [HttpGet(Name = "ObtenerLibrosV1")]
         [AllowAnonymous]
         [OutputCache(Tags = [cache])]
         public async Task<IEnumerable<LibroDTO>> Get([FromQuery] PaginacionDTO paginacionDTO)
@@ -92,7 +92,7 @@ namespace BibliotecaAPI.Controllers.v1
             return libroDTO;
         }
 
-        [HttpPost]
+        [HttpPost(Name = "CrearLibroV1")]
         [ServiceFilter<FiltroValidacionLibro>()]
         public async Task<ActionResult> Post(LibroCreacionDTO libroCreacionDTO)
         {
@@ -119,7 +119,7 @@ namespace BibliotecaAPI.Controllers.v1
             }
         }
 
-        [HttpPut("{id:int}")]
+        [HttpPut("{id:int}", Name = "ActualizarLibroV1")]
         [ServiceFilter<FiltroValidacionLibro>()]
         public async Task<ActionResult> Put(int id, LibroCreacionDTO libroCreacionDTO)
         {
@@ -140,7 +140,7 @@ namespace BibliotecaAPI.Controllers.v1
             return NoContent();
         }
 
-        [HttpDelete("{id:int}")]
+        [HttpDelete("{id:int}", Name = "BorrarLibroV1")]
         public async Task<ActionResult> Delete(int id)
         {
             var registrosBorrados = await context.Libros.Where(x => x.Id == id).ExecuteDeleteAsync();
