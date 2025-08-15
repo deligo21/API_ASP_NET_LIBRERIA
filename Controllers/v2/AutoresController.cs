@@ -18,7 +18,6 @@ namespace BibliotecaAPI.Controllers.v2
     [ApiController]
     [Route("api/v2/autores")]
     [Authorize(Policy = "esAdmin")]
-    [FiltroAgregarCabeceras("X-Powered-By", "BibliotecaAPI")]
     public class AutoresController : ControllerBase
     {
         private readonly ApplicationDbContext context;
@@ -44,9 +43,7 @@ namespace BibliotecaAPI.Controllers.v2
 
         [HttpGet] // api/autores
         [AllowAnonymous]
-        //[OutputCache(Tags = [cache])]
-        [ServiceFilter<MiFiltroDeAccion>()]
-        [FiltroAgregarCabeceras("accion", "obtener-autores")]
+        [OutputCache(Tags = [cache])]
         public async Task<IEnumerable<AutorDTO>> Get([FromQuery] PaginacionDTO paginacionDTO)
         {
             return await servicioAutoresV1.Get(paginacionDTO);
@@ -59,7 +56,7 @@ namespace BibliotecaAPI.Controllers.v2
         [EndpointDescription("Devuelve un autor junto con sus libros asociados, si los hay.")]
         [ProducesResponseType(typeof(AutorConLibrosDTO), 200)]
         [ProducesResponseType(404)]
-        //[OutputCache(Tags = [cache])]
+        [OutputCache(Tags = [cache])]
         public async Task<ActionResult<AutorConLibrosDTO>> Get([Description("El ID del autor")]int id, bool incluirLibros = false)
         {
             var queryable = context.Autores.AsQueryable();
